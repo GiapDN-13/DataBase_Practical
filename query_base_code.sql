@@ -289,3 +289,132 @@ FROM tblEmployee E
 LEFT JOIN tblDependent D ON E.empSSN = D.empSSN
 GROUP BY E.empSSN, E.empName
 ORDER BY dependentCount ASC;
+
+--Họ và tên: Nguyễn Quang Nhật
+--MSSV: DE180423
+
+--40:Cho biết nhân viên nào không có người phụ thuộc. Thông tin yêu cầu: mã số nhân viên, họ tên nhân viên, tên phòng ban của nhân viên
+Select e.empSSN as 'mã số nhân viên', e.empName as 'Họ và tên nhân viên', dp.depName as 'tên phòng ban', dp.depNum
+from tblEmployee e
+left join tblDependent d on e.empSSN = d.empSSN
+left join tblDepartment dp on dp.depNum = e.depNum
+WHERE d.empSSN IS NULL;
+
+--41:Cho biết phòng ban nào không có người phụ thuộc. Thông tin yêu cầu: mã số phòng ban, tên phòng ban
+SELECT DISTINCT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban'
+FROM tblDepartment d
+LEFT JOIN tblEmployee e ON d.depNum = e.depNum
+LEFT JOIN tblDependent p ON e.empSSN = p.empSSN
+WHERE p.empSSN IS NULL;
+
+Select e.empSSN, e.empName
+From tblEmployee e
+LEFT JOIN tblDepartment d ON e.depNum = d.depNum
+where d.depNum = 3;
+
+SELECT d.depName, COUNT(e.empSSN) AS num_employees
+FROM tblEmployee e
+JOIN tblDepartment d ON e.depNum = d.depNum
+GROUP BY d.depName;
+
+--42: Cho biết những nhân viên nào chưa hề tham gia vào bất kỳ dự án nào. Thông tin yêu cầu: mã số, tên nhân viên, tên phòng ban của nhân viên
+SELECT e.empSSN as 'mã số nhân viên', e.empName as 'Họ và tên nhân viên', d.depName as 'tên phòng ban'
+FROM tblEmployee e
+LEFT JOIN tblWorksOn w ON e.empSSN = w.empSSN
+LEFT JOIN tblDepartment d ON e.depNum = d.depNum
+WHERE w.proNum IS NULL;
+
+--43: Cho biết phòng ban không có nhân viên nào tham gia (bất kỳ) dự án. Thông tin yêu cầu: mã số phòng ban, tên phòng ban
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban'
+FROM tblDepartment d
+LEFT JOIN tblEmployee e ON d.depNum = e.depNum
+LEFT JOIN tblWorksOn w ON e.empSSN = w.empSSN
+GROUP BY d.depNum, d.depName
+HAVING COUNT(w.proNum) = 0;
+
+----Chỉ ra nhân viên thuộc phòng ban 5
+select empSSN, empName from tblEmployee
+where depNum = 5
+
+--44: Cho biết phòng ban không có nhân viên nào tham gia vào dự án có tên là ProjectA. Thông tin yêu cầu: mã số phòng ban, tên phòng ban
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban'
+FROM tblDepartment d
+LEFT JOIN tblEmployee e ON d.depNum = e.depNum
+LEFT JOIN tblWorksOn w ON e.empSSN = w.empSSN
+LEFT JOIN tblProject p ON w.proNum = p.proNum AND p.proName = 'ProjectA'
+GROUP BY d.depNum, d.depName
+HAVING COUNT(p.proNum) = 0;
+
+--45: Cho biết số lượng dự án được quản lý theo mỗi phòng ban. Thông tin yêu cầu: mã phòng ban, tên phòng ban, số lượng dự án
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban', COUNT(p.proNum) as 'Số lượng dự án'
+FROM tblDepartment d
+LEFT JOIN tblProject p ON d.depNum = p.depNum
+GROUP BY d.depNum, d.depName;
+
+--46: Cho biết phòng ban nào quản lý it dự án nhất. Thông tin yêu cầu: mã phòng ban, tên phòng ban, số lượng dự án
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban', COUNT(p.proNum) as 'Số lượng dự án'
+FROM tblDepartment d
+LEFT JOIN tblProject p ON d.depNum = p.depNum
+GROUP BY d.depNum, d.depName
+HAVING COUNT(p.proNum) <= ALL (
+    SELECT COUNT(p2.proNum)
+    FROM tblDepartment d2
+    LEFT JOIN tblProject p2 ON d2.depNum = p2.depNum
+    GROUP BY d2.depNum
+)
+ORDER BY N'Số lượng dự án';
+
+--47: Cho biết phòng ban nào quản lý nhiều dự án nhất. Thông tin yêu cầu: mã phòng ban, tên phòng ban, số lượng dự án
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban', COUNT(p.proNum) as 'Số lượng dự án'
+FROM tblDepartment d
+LEFT JOIN tblProject p ON d.depNum = p.depNum
+GROUP BY d.depNum, d.depName
+HAVING COUNT(p.proNum) >= ALL (
+    SELECT COUNT(p2.proNum)
+    FROM tblDepartment d2
+    LEFT JOIN tblProject p2 ON d2.depNum = p2.depNum
+    GROUP BY d2.depNum
+)
+ORDER BY N'Số lượng dự án';
+
+--48: Cho biết những phòng ban nào có nhiểu hơn 5 nhân viên đang quản lý dự án gì. Thông tin yêu cầu: mã phòng ban, tên phòng ban, số lượng nhân viên của phòng ban, tên dự án quản lý
+SELECT d.depNum as 'Mã số phòng ban', d.depName as 'tên phòng ban', COUNT(e.empSSN) as 'Số lượng nhân viên', p.proName as 'tên dự án quản lý'
+FROM tblDepartment d
+LEFT JOIN tblEmployee e ON d.depNum = e.depNum
+LEFT JOIN tblProject p ON d.depNum = p.depNum
+GROUP BY d.depNum, d.depName, p.proName
+HAVING COUNT(e.empSSN) > 4;
+
+--49: Cho biết những nhân viên thuộc phòng có tên là Phòng nghiên cứu, và không có người phụ thuộc. Thông tin yêu cầu: mã nhân viên,họ tên nhân viên
+SELECT e.empSSN AS 'Mã nhân viên', e.empName AS 'họ tên nhân viên'
+FROM tblEmployee e
+JOIN tblDepartment d ON d.depNum = e.depNum
+JOIN tblDependent dep ON dep.empSSN = e.empSSN
+WHERE d.depName = N'Phòng Nghiên cứu và phát triển'
+  AND dep.empSSN IS NULL
+GROUP BY e.empSSN, e.empName;
+
+--50: Cho biết tổng số giờ làm của các nhân viên, mà các nhân viên này không có người phụ thuộc. Thông tin yêu cầu: mã nhân viên,họ tên nhân viên, tổng số giờ làm
+SELECT e.empSSN AS 'Mã nhân viên', e.empName AS 'họ tên nhân viên', SUM(w.workHours) AS 'tổng số giờ làm'
+FROM tblEmployee e
+LEFT JOIN tblDependent p ON e.empSSN = p.empSSN
+JOIN tblWorksOn w ON e.empSSN = w.empSSN
+WHERE p.empSSN IS NULL
+GROUP BY e.empSSN, e.empName;
+
+--51: Cho biết tổng số giờ làm của các nhân viên, mà các nhân viên này có nhiều hơn 3 người phụ thuộc. Thông tin yêu cầu: mã nhân viên,họ tên nhân viên, số lượng người phụ thuộc, tổng số giờ làm
+SELECT e.empSSN AS 'Mã nhân viên', e.empName AS 'họ tên nhân viên', COUNT(p.empSSN) AS 'Số lượng người phụ thuộc', SUM(w.workHours) AS 'Tổng số giờ làm'
+FROM tblEmployee e
+LEFT JOIN tblDependent p ON e.empSSN = p.empSSN
+LEFT JOIN tblWorksOn w ON e.empSSN = w.empSSN
+GROUP BY e.empSSN, e.empName
+HAVING COUNT(p.empSSN) >= 3;
+
+select * from tblDependent
+--52: Cho biết tổng số giờ làm việc của các nhân viên hiện đang dưới quyền giám sát (bị quản lý bởi) của nhân viên Mai Duy An. Thông tin yêu cầu: mã nhân viên, họ tên nhân viên, tổng số giờ làm
+SELECT e.empSSN AS 'Mã nhân viên', e.empName AS 'họ tên nhân viên', SUM(w.workHours) AS 'Tổng số giờ làm'
+FROM tblEmployee e
+JOIN tblEmployee s ON e.supervisorSSN = s.empSSN
+JOIN tblWorksOn w ON e.empSSN = w.empSSN
+WHERE s.empName = 'Mai Duy An'
+GROUP BY e.empSSN, e.empName;
