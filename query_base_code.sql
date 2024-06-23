@@ -1,3 +1,106 @@
+--Họ và tên: Đặng Nguyên Giáp
+--MSSV: DE180345
+USE FUH_COMPANY
+SELECT *
+FROM tblDepartment
+SELECT *
+FROM tblDependent
+SELECT *
+FROM tblDepLocation
+SELECT *
+FROM tblEmployee
+SELECT *
+FROM tblLocation
+SELECT *
+FROM tblProject
+SELECT *
+FROM tblWorksOn
+
+--Question 1:
+SELECT e.empSSN, e.empName, d.depNum, d.depName
+FROM tblDepartment d
+         JOIN tblEmployee e ON d.mgrSSN = e.empSSN
+WHERE d.depName = N'Phòng Nghiên cứu và phát triển'
+
+--Question 2:
+SELECT p.proNum, p.proName, d.depName
+FROM tblProject p
+         JOIN tblDepartment d ON p.depNum = d.depNum
+WHERE d.depName = N'Phòng Nghiên cứu và phát triển'
+
+--Question 3:
+SELECT p.proNum, p.proName, d.depName
+FROM tblProject p
+         JOIN tblDepartment d ON p.depNum = d.depNum
+WHERE p.proName = N'ProjectB'
+
+--Question 4:
+SELECT e.empSSN, e.empName
+FROM tblEmployee e
+         JOIN tblEmployee s ON e.supervisorSSN = s.empSSN
+WHERE s.empName = N'Mai Duy An'
+
+--Question 5:
+SELECT s.empSSN, s.empName
+FROM tblEmployee e
+         JOIN tblEmployee s ON e.supervisorSSN = s.empSSN
+WHERE e.empName = N'Mai Duy An'
+
+--Question 6:
+SELECT l.locNum, l.locName
+FROM tblProject p
+         JOIN tblLocation l ON p.locNum = l.locNum
+WHERE p.proName = N'ProjectA'
+
+--Question 7:
+SELECT p.proNum, p.proName
+FROM tblProject p
+         JOIN tblLocation l ON p.locNum = l.locNum
+WHERE l.locName = N'TP Hồ Chí Minh'
+
+--Question 8:
+SELECT d.depName, d.depBirthdate, e.empName
+FROM tblDependent d
+         JOIN tblEmployee e ON d.empSSN = e.empSSN
+WHERE DATEDIFF(YEAR, d.depBirthdate, GETDATE()) > 18;
+
+--Question 9:
+SELECT d.depName, d.depBirthdate, e.empName
+FROM tblDependent d
+         JOIN tblEmployee e ON d.empSSN = e.empSSN
+WHERE d.depSex = 'M';
+
+--Question 10:
+SELECT d.depNum, d.depName, l.locName
+FROM tblDepartment d
+         JOIN tblDepLocation dl ON d.depNum = dl.depNum
+         JOIN tblLocation l ON dl.locNum = l.locNum
+WHERE d.depName = N'Phòng Nghiên cứu và phát triển'
+
+--Question 11:
+SELECT p.proNum, p.proName, d.depName
+FROM tblProject p
+         JOIN tblLocation l ON p.locNum = l.locNum
+         JOIN tblDepartment d ON p.depNum = d.depNum
+WHERE l.locName = N'TP Hồ Chí Minh'
+
+--Question 12:
+SELECT e.empName, d.depName, d.depRelationship
+FROM tblDependent d
+         JOIN tblEmployee e ON d.empSSN = e.empSSN
+         JOIN tblDepartment dp ON e.depNum = dp.depNum
+WHERE d.depSex = 'F'
+  AND dp.depName = N'Phòng Nghiên cứu và phát triển'
+
+--Question 13:
+SELECT e.empName, d.depName, d.depRelationship
+FROM tblDependent d
+         JOIN tblEmployee e ON d.empSSN = e.empSSN
+         JOIN tblDepartment dp ON e.depNum = dp.depNum
+WHERE DATEDIFF(YEAR, d.depBirthdate, GETDATE()) > 18
+  AND dp.depName = N'Phòng Nghiên cứu và phát triển'
+--Họ và tên: Lâm Gia Kiệt
+--MSSV: DE180340
 USE FUH_COMPANY
 --27.	Cho biết tổng số giờ làm của mỗi dự án. Thông tin yêu cầu: mã dự án, tên dự án, tổng số giờ làm
 SELECT P.proNum, P.proName, SUM(W.workHours) AS totalWorkHours
